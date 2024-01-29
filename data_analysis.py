@@ -1,7 +1,7 @@
 import pandas as pd
 import polyline
 from pandas import json_normalize
-from Scripts.data_get import *
+from data_get import *
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
