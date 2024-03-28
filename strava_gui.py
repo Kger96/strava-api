@@ -12,6 +12,7 @@ import folium
 import numpy as np
 import pyqtgraph as pg
 
+from lib.helper_functions import generate_gpx_file, create_timestamped_geojson, calc_elevation_plot
 from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
@@ -157,14 +158,12 @@ class MainWindow(QMainWindow):
         activity2_route_stream = strava_dataset.get_route_stream(activity2_id, 2)
 
         # Convert dataframe into a gpx file
-        strava_dataset.generate_gpx_file(activity1_route_stream, 1)
-        strava_dataset.generate_gpx_file(activity2_route_stream, 2)
+        generate_gpx_file(activity1_route_stream, 1)
+        generate_gpx_file(activity2_route_stream, 2)
 
         # Convert dataframe to Timestamped Geojson
-        activity_geojson = strava_dataset.create_timestamped_geojson(activity1_route_stream,
-                                                                     activity2_route_stream,
-                                                                     '#1A3B7D',
-                                                                     '#7D1A3B')
+        activity_geojson = create_timestamped_geojson(activity1_route_stream, activity2_route_stream,
+                                                      '#1A3B7D', '#7D1A3B')
 
         # Lists to store combined latitude and longitudes
         combined_lat = []
@@ -215,7 +214,7 @@ class MainWindow(QMainWindow):
         Update the plot widget with the elevation data from the activities selected.
         """
         # Calculate the cumulative elevation and distance data
-        activity1_route_stream = strava_dataset.calc_elevation_plot(activity1_route_stream)
+        activity1_route_stream = calc_elevation_plot(activity1_route_stream)
 
         # Define x and y data
         x = activity1_route_stream['cum_distance']
