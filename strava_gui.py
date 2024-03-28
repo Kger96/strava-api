@@ -1,16 +1,24 @@
+"""
+Title: Strava Gui Application
+Purpose: Interactive Strava activity interaction GUI to allow direct comparison between Strava activities.
+Author: Kieran Gash
+Date: 21/03/2024
+"""
+
 import sys
 import io
-from pathlib import Path
-
+import strava_dataset
+import folium
 import numpy as np
+import pyqtgraph as pg
+
+from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
     QProgressBar, QFormLayout, QWidget
 from PyQt5.QtCore import Qt
 from folium.plugins import TimestampedGeoJson
 
-import strava_dataset
-import folium
 
 html_path = "C:\\workspace\\Strava\\strava-api\\strava_map.html"
 
@@ -41,25 +49,25 @@ class MainWindow(QMainWindow):
         main_layout_v1 = QVBoxLayout(central_widget)
         main_layout_v1.setAlignment(Qt.AlignVCenter)
 
-        # Get data button
-        self.getData_btn = QPushButton("Get Data")
-        self.getData_btn.setFixedWidth(125)
-        self.getData_btn.setFixedHeight(25)
+        # Get Activities button
+        self.getActivities_btn = QPushButton("Get Activities")
+        self.getActivities_btn.setFixedWidth(125)
+        self.getActivities_btn.setFixedHeight(25)
 
         # Activity 1 combo box
         self.activity1_combo = QComboBox(self)
         self.activity1_combo.setEditable(True)
-        self.activity1_combo.addItem("GET DATA")
+        self.activity1_combo.addItem("NO DATA")
 
         # Activity 2 combo box
         self.activity2_combo = QComboBox(self)
         self.activity2_combo.setEditable(True)
-        self.activity2_combo.addItem("GET DATA")
+        self.activity2_combo.addItem("NO DATA")
 
-        # Generate GPX button
-        self.genGPX_btn = QPushButton("Generate")
-        self.genGPX_btn.setFixedWidth(125)
-        self.genGPX_btn.setFixedHeight(25)
+        # RUN button
+        self.run_btn = QPushButton("RUN")
+        self.run_btn.setFixedWidth(125)
+        self.run_btn.setFixedHeight(25)
 
         # Data collection progress bar
         self.data_progress = QProgressBar(self)
@@ -77,10 +85,10 @@ class MainWindow(QMainWindow):
 
         # Add widgets to form layout and add form layout
         main_layout_form = QFormLayout()
-        main_layout_form.addRow(self.getData_btn, self.data_progress)
+        main_layout_form.addRow(self.getActivities_btn, self.data_progress)
         main_layout_form.addRow("Activity 1:", self.activity1_combo)
         main_layout_form.addRow("Activity 2: ", self.activity2_combo)
-        main_layout_form.addRow(self.genGPX_btn, self.gpx_progress)
+        main_layout_form.addRow(self.run_btn, self.gpx_progress)
 
         # Add form layout to the main layout
         main_layout_v1.addLayout(main_layout_form)
@@ -98,11 +106,19 @@ class MainWindow(QMainWindow):
         self.webview.setHtml(data.getvalue().decode())
         main_layout_v1.addWidget(self.webview)
 
+        # Create PlotWidget to display elevation
+        self.elevation_plot = pg.PlotWidget()
+        self.elevation_plot.setLabel('left', "Elevation (m)")
+        self.elevation_plot.setLabel('bottom', "Distance (km)")
+        self.elevation_plot.setXRange(0, 5)
+        self.elevation_plot.setYRange(0, 100)
+        main_layout_v1.addWidget(self.elevation_plot)
+
         self.setLayout(main_layout_v1)
 
         # Button actions
-        self.getData_btn.clicked.connect(self.update_combobox)
-        self.genGPX_btn.clicked.connect(self.generate_gpx)
+        self.getActivities_btn.clicked.connect(self.update_combobox)
+        self.run_btn.clicked.connect(self.generate_gpx)
 
     def update_combobox(self):
         """
@@ -117,7 +133,7 @@ class MainWindow(QMainWindow):
 
         # Add latest 10 activities to list
         activity_name = []
-        for i in range(0, 30):
+        for i in range(0, 200):
             activity_name.append(self.activities[i]['name'])
 
         # Add list to combo boxes
@@ -145,8 +161,10 @@ class MainWindow(QMainWindow):
         strava_dataset.generate_gpx_file(activity2_route_stream, 2)
 
         # Convert dataframe to Timestamped Geojson
-        activity1_geojson = strava_dataset.create_timestamped_geojson(activity1_route_stream, '#1A3B7D')
-        activity2_geojson = strava_dataset.create_timestamped_geojson(activity2_route_stream, '#7D1A3B')
+        activity_geojson = strava_dataset.create_timestamped_geojson(activity1_route_stream,
+                                                                     activity2_route_stream,
+                                                                     '#1A3B7D',
+                                                                     '#7D1A3B')
 
         # Lists to store combined latitude and longitudes
         combined_lat = []
@@ -164,15 +182,9 @@ class MainWindow(QMainWindow):
         centroid = [np.mean(combined_lat), np.mean(combined_long)]
         update_map = folium.Map(location=centroid, tiles='CartoDBDark_Matter', zoom_start=13)
 
-        # Add animation of Activity 1
-        TimestampedGeoJson(activity1_geojson,
-                           period='PT10S',
-                           auto_play=True,
-                           loop=False).add_to(update_map)
-
-        # Add animation of Activity 2
-        TimestampedGeoJson(activity2_geojson,
-                           period='PT10S',
+        # Add animation of Activities
+        TimestampedGeoJson(activity_geojson,
+                           period='PT1S',
                            auto_play=True,
                            loop=False).add_to(update_map)
 
@@ -180,6 +192,9 @@ class MainWindow(QMainWindow):
         data = io.BytesIO()
         update_map.save(data, close_file=False)
         self.webview.setHtml(data.getvalue().decode())
+
+        # Update the plot widget
+        self.update_plot(activity1_route_stream)
 
     def activity_id_search(self, activity_name):
         """
@@ -195,13 +210,30 @@ class MainWindow(QMainWindow):
 
         return activity_id
 
+    def update_plot(self, activity1_route_stream):
+        """
+        Update the plot widget with the elevation data from the activities selected.
+        """
+        # Calculate the cumulative elevation and distance data
+        activity1_route_stream = strava_dataset.calc_elevation_plot(activity1_route_stream)
+
+        # Define x and y data
+        x = activity1_route_stream['cum_distance']
+        y = activity1_route_stream['cum_elevation']
+
+        self.elevation_plot.setXRange(0, max(x))
+        self.elevation_plot.setYRange(min(y), max(y))
+
+        self.elevation_plot.clear()
+        self.elevation_plot.plot(x, y)
+
     def ideas_function(self):
         """
         Function to store ideas and plan for the project temporarily
         """
-        # Complete the flyby functionality
-        # Add 2 widgets which display the elevation profile of the activities
-            # https://betterdatascience.com/data-science-for-cycling-how-to-calculate-elevation-difference-and-distance-from-strava-gpx-route/
+        # Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
+        # Move data manipulate functions to helper functions script
+        # Create thread for application and buttons etc.
 
 
 if __name__ == "__main__":
