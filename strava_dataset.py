@@ -5,15 +5,10 @@ Author: Kieran Gash
 Date: 21/03/2024
 """
 
-import gpxpy
-import numpy as np
 import pandas as pd
 import requests
 import urllib3
-import haversine as hs
-import geopandas as geo_pd
 
-from shapely import Point
 from datetime import datetime, timedelta
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -70,3 +65,18 @@ def get_route_stream(activity_id, activity_num):
     data.to_csv(f'dist\\strava_activity{activity_num}', index=False)
 
     return data
+
+
+def get_activity_id(activity_name, activities):
+    """
+    Search the activity dataset for the names required and return the associated id
+    """
+    activity_id = 0
+
+    # Search through the full activities list and find the ID associated with the name
+    for index, entry in enumerate(activities):
+        if activity_name == activities[index]['name']:
+            activity_id = activities[index]['id']
+            break
+
+    return activity_id

@@ -12,7 +12,7 @@ import folium
 import numpy as np
 import pyqtgraph as pg
 
-from lib.helper_functions import generate_gpx_file, create_timestamped_geojson, calc_elevation_plot
+from lib.helper_functions import create_timestamped_geojson, calc_elevation_plot
 from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
@@ -119,11 +119,12 @@ class MainWindow(QMainWindow):
 
         # Button actions
         self.getActivities_btn.clicked.connect(self.update_combobox)
-        self.run_btn.clicked.connect(self.generate_gpx)
+        self.run_btn.clicked.connect(self.flyby_animation)
 
     def update_combobox(self):
         """
-        Update the options within the combo boxes following collection of the dataset
+        Update the activities which are displayed within the combo boxes. Currently set to display the latest 200
+        activities.
         """
         # Clear existing combo boxes
         self.activity1_combo.clear()
@@ -132,50 +133,49 @@ class MainWindow(QMainWindow):
         # Get all activities
         self.activities = strava_dataset.get_activities()
 
-        # Add latest 10 activities to list
-        activity_name = []
+        # Add latest 200 activities to list
+        activity_list = []
         for i in range(0, 200):
-            activity_name.append(self.activities[i]['name'])
+            activity_list.append(self.activities[i]['name'])
 
         # Add list to combo boxes
-        self.activity1_combo.addItems(activity_name)
-        self.activity2_combo.addItems(activity_name)
+        self.activity1_combo.addItems(activity_list)
+        self.activity2_combo.addItems(activity_list)
 
-    def generate_gpx(self):
+    def process_activities(self):
         """
-        Generates 2 gpx files for each of the activities selected
+        Take the activities chosen and process into dataframes and gpx files in preparation of animation.
         """
-        # Assign text from combo boxes to variables
-        activity1_name = self.activity1_combo.currentText()
-        activity2_name = self.activity2_combo.currentText()
-
         # Get the activity ID for the activity names
-        activity1_id = self.activity_id_search(activity1_name)
-        activity2_id = self.activity_id_search(activity2_name)
+        activity1_id = strava_dataset.get_activity_id(self.activity1_combo.currentText(), self.activities)
+        activity2_id = strava_dataset.get_activity_id(self.activity2_combo.currentText(), self.activities)
 
-        # Get the activity route data as a dataframe
-        activity1_route_stream = strava_dataset.get_route_stream(activity1_id, 1)
-        activity2_route_stream = strava_dataset.get_route_stream(activity2_id, 2)
-
-        # Convert dataframe into a gpx file
-        generate_gpx_file(activity1_route_stream, 1)
-        generate_gpx_file(activity2_route_stream, 2)
+        # Create activity route dataframe
+        activity1_df = strava_dataset.get_route_stream(activity1_id, 1)
+        activity2_df = strava_dataset.get_route_stream(activity2_id, 2)
 
         # Convert dataframe to Timestamped Geojson
-        activity_geojson = create_timestamped_geojson(activity1_route_stream, activity2_route_stream,
+        activity_geojson = create_timestamped_geojson(activity1_df, activity2_df,
                                                       '#1A3B7D', '#7D1A3B')
 
+        # Update map and prepare animation
+        self.flyby_animation(activity1_df, activity2_df, activity_geojson)
+
+    def flyby_animation(self, activity1_df, activity2_df, activity_geojson):
+        """
+        Generate the animation, reposition the map and create gpx, and dataframes for the two routes chosen. 
+        """
         # Lists to store combined latitude and longitudes
         combined_lat = []
         combined_long = []
 
         # Add both latitudes to list
-        combined_lat.extend(activity1_route_stream['lat'])
-        combined_lat.extend(activity2_route_stream['lat'])
+        combined_lat.extend(activity1_df['lat'])
+        combined_lat.extend(activity2_df['lat'])
 
         # Add both longitudes to list
-        combined_long.extend(activity1_route_stream['long'])
-        combined_long.extend(activity2_route_stream['long'])
+        combined_long.extend(activity1_df['long'])
+        combined_long.extend(activity2_df['long'])
 
         # Update map to centre on the chosen routes
         centroid = [np.mean(combined_lat), np.mean(combined_long)]
@@ -193,21 +193,7 @@ class MainWindow(QMainWindow):
         self.webview.setHtml(data.getvalue().decode())
 
         # Update the plot widget
-        self.update_plot(activity1_route_stream)
-
-    def activity_id_search(self, activity_name):
-        """
-        Search the activity dataset for the names required and return the associated id
-        """
-        activity_id = 0
-
-        # Search through the full activities list and find the ID associated with the name
-        for index, entry in enumerate(self.activities):
-            if activity_name == self.activities[index]['name']:
-                activity_id = self.activities[index]['id']
-                break
-
-        return activity_id
+        self.update_plot(activity1_df)
 
     def update_plot(self, activity1_route_stream):
         """
@@ -226,13 +212,13 @@ class MainWindow(QMainWindow):
         self.elevation_plot.clear()
         self.elevation_plot.plot(x, y)
 
-    def ideas_function(self):
-        """
-        Function to store ideas and plan for the project temporarily
-        """
-        # Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
-        # Move data manipulate functions to helper functions script
-        # Create thread for application and buttons etc.
+# TODO: Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
+# TODO: Create thread for application and buttons etc.
+# TODO: Review activity choice matrix.
+# TODO: Make the flyby animation smoother.
+# TODO: Add an athlete id entry box to enable other users to to use the tool.
+# TODO: Compare activities between multiple atheletes
+# TODO: Update elevation profile appearance.
 
 
 if __name__ == "__main__":
