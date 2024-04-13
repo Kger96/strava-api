@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
 
         # Window Setup (Title, Size, Position ...)
         self.setWindowTitle("Strava GUI - v0.1")
-        self.setMinimumSize(800, 400)
+        self.setMinimumSize(1000, 1000)
         frame_geometry = self.frameGeometry()
         screen_center = QDesktopWidget().availableGeometry().center()
         frame_geometry.moveCenter(screen_center)
@@ -71,11 +71,8 @@ class MainWindow(QMainWindow):
         main_layout_form.addRow("", self.activity2_combo)
         main_layout_form.addRow("", self.run_btn)
 
-        # Add form layout to the main layout
-        main_layout_v1.addLayout(main_layout_form)
-
         # Create map with starting lat long and zoom
-        strava_map = folium.Map(location=[51.381065, -2.359017], tiles='CartoDBDark_Matter', zoom_start=14)
+        strava_map = folium.Map(location=[51.381065, -2.359017], tiles='CartoDBPositron', zoom_start=14)
 
         # Save initial map in BytesIO
         data = io.BytesIO()
@@ -85,17 +82,30 @@ class MainWindow(QMainWindow):
         self.webview = QWebEngineView(self)
         self.webview.setMinimumSize(600, 400)
         self.webview.setHtml(data.getvalue().decode())
-        main_layout_v1.addWidget(self.webview)
 
-        # Create PlotWidget to display elevation
-        self.elevation_plot = pg.PlotWidget()
-        self.elevation_plot.setLabel('left', "Elevation (m)")
-        self.elevation_plot.setLabel('bottom', "Distance (km)")
-        self.elevation_plot.setXRange(0, 5)
-        self.elevation_plot.setYRange(0, 100)
-        self.elevation_plot.setBackground("#1E1F22")
-        self.pen = pg.mkPen(color="#3574F0", width=2)
-        main_layout_v1.addWidget(self.elevation_plot)
+        # Create PlotWidget to display elevation of activity 1
+        self.elevation_plot_act1 = pg.PlotWidget()
+        self.elevation_plot_act1.setLabel('left', "Elevation (m)")
+        self.elevation_plot_act1.setLabel('bottom', "Distance (km)")
+        self.elevation_plot_act1.setXRange(0, 5)
+        self.elevation_plot_act1.setYRange(0, 100)
+        self.elevation_plot_act1.setBackground("#1E1F22")
+        self.pen1 = pg.mkPen(color="#3574F0", width=2)
+
+        # Create PlotWidget to display elevation of activity 2
+        self.elevation_plot_act2 = pg.PlotWidget()
+        self.elevation_plot_act2.setLabel('left', "Elevation (m)")
+        self.elevation_plot_act2.setLabel('bottom', "Distance (km)")
+        self.elevation_plot_act2.setXRange(0, 5)
+        self.elevation_plot_act2.setYRange(0, 100)
+        self.elevation_plot_act2.setBackground("#1E1F22")
+        self.pen2 = pg.mkPen(color="#7D1A3B", width=2)
+
+        # Add widgets to main layout
+        main_layout_v1.addLayout(main_layout_form)
+        main_layout_v1.addWidget(self.elevation_plot_act1)
+        main_layout_v1.addWidget(self.elevation_plot_act2)
+        main_layout_v1.addWidget(self.webview)
 
         self.setLayout(main_layout_v1)
 
@@ -103,7 +113,6 @@ class MainWindow(QMainWindow):
         self.update_combobox()
 
         # Button actions
-        # self.getActivities_btn.clicked.connect(self.update_combobox)
         self.run_btn.clicked.connect(self.process_activities)
 
     def update_combobox(self):
@@ -164,7 +173,7 @@ class MainWindow(QMainWindow):
 
         # Update map to centre on the chosen routes
         centroid = [np.mean(combined_lat), np.mean(combined_long)]
-        update_map = folium.Map(location=centroid, tiles='CartoDBDark_Matter', zoom_start=13)
+        update_map = folium.Map(location=centroid, tiles='CartoDBPositron', zoom_start=13)
 
         # Add animation of Activities
         TimestampedGeoJson(activity_geojson,
@@ -178,31 +187,38 @@ class MainWindow(QMainWindow):
         self.webview.setHtml(data.getvalue().decode())
 
         # Update the plot widget
-        self.update_plot(activity1_df)
+        self.update_plot(activity1_df, activity2_df)
 
-    def update_plot(self, activity1_route_stream):
+    def update_plot(self, activity1_route_stream, activity2_route_stream):
         """
         Update the plot widget with the elevation data from the activities selected.
         """
         # Calculate the cumulative elevation and distance data
         activity1_route_stream = calc_elevation_plot(activity1_route_stream)
+        activity2_route_stream = calc_elevation_plot(activity2_route_stream)
 
         # Define x and y data
-        x = activity1_route_stream['cum_distance']
-        y = activity1_route_stream['altitude']
+        x1 = activity1_route_stream['cum_distance']
+        x2 = activity2_route_stream['cum_distance']
+        y1 = activity1_route_stream['altitude']
+        y2 = activity2_route_stream['altitude']
 
-        self.elevation_plot.setXRange(0.2, max(x))
-        self.elevation_plot.setYRange(min(y), max(y))
+        self.elevation_plot_act1.setXRange(0.2, max(x1))
+        self.elevation_plot_act1.setYRange(min(y1), max(y1))
+        self.elevation_plot_act2.setXRange(0.2, max(x2))
+        self.elevation_plot_act2.setYRange(min(y2), max(y2))
 
-        self.elevation_plot.clear()
-        self.elevation_plot.plot(x, y, pen=self.pen, fillLevel=10, brush=(26, 59, 125, 50))
+        self.elevation_plot_act1.clear()
+        self.elevation_plot_act2.clear()
+        self.elevation_plot_act1.plot(x1, y1, pen=self.pen1, fillLevel=10, brush=(26, 59, 125, 50))
+        self.elevation_plot_act2.plot(x2, y2, pen=self.pen2, fillLevel=10, brush=(125, 26, 59, 50))
 
 # TODO: Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
 # TODO: Create thread for application and buttons etc.
 # TODO: Review activity choice matrix.
 # TODO: Make the flyby animation smoother.
-# TODO: Add an athlete id entry box to enable other users to to use the tool.
 # TODO: Compare activities between multiple atheletes
+# TODO: Add the update combo box to its own thread to ensure it does not delay the loading of the application.
 
 
 class AthleteSelectorDialog(QDialog):
