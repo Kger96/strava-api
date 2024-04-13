@@ -113,13 +113,15 @@ class MainWindow(QMainWindow):
         self.elevation_plot.setLabel('bottom', "Distance (km)")
         self.elevation_plot.setXRange(0, 5)
         self.elevation_plot.setYRange(0, 100)
+        self.elevation_plot.setBackground("#1E1F22")
+        self.pen = pg.mkPen(color="#3574F0", width=2)
         main_layout_v1.addWidget(self.elevation_plot)
 
         self.setLayout(main_layout_v1)
 
         # Button actions
         self.getActivities_btn.clicked.connect(self.update_combobox)
-        self.run_btn.clicked.connect(self.flyby_animation)
+        self.run_btn.clicked.connect(self.process_activities)
 
     def update_combobox(self):
         """
@@ -156,7 +158,7 @@ class MainWindow(QMainWindow):
 
         # Convert dataframe to Timestamped Geojson
         activity_geojson = create_timestamped_geojson(activity1_df, activity2_df,
-                                                      '#1A3B7D', '#7D1A3B')
+                                                      '#3574F0', '#7D1A3B')
 
         # Update map and prepare animation
         self.flyby_animation(activity1_df, activity2_df, activity_geojson)
@@ -204,13 +206,13 @@ class MainWindow(QMainWindow):
 
         # Define x and y data
         x = activity1_route_stream['cum_distance']
-        y = activity1_route_stream['cum_elevation']
+        y = activity1_route_stream['altitude']
 
-        self.elevation_plot.setXRange(0, max(x))
+        self.elevation_plot.setXRange(0.2, max(x))
         self.elevation_plot.setYRange(min(y), max(y))
 
         self.elevation_plot.clear()
-        self.elevation_plot.plot(x, y)
+        self.elevation_plot.plot(x, y, pen=self.pen, fillLevel=10, brush=(26, 59, 125, 50))
 
 # TODO: Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
 # TODO: Create thread for application and buttons etc.
@@ -218,7 +220,6 @@ class MainWindow(QMainWindow):
 # TODO: Make the flyby animation smoother.
 # TODO: Add an athlete id entry box to enable other users to to use the tool.
 # TODO: Compare activities between multiple atheletes
-# TODO: Update elevation profile appearance.
 
 
 if __name__ == "__main__":

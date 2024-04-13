@@ -121,7 +121,7 @@ def calc_elevation_plot(data):
     data['distance'] = distances
 
     data['cum_elevation'] = data['elevation_diff'].cumsum()
-    data['cum_distance'] = data['distance'].cumsum()
+    data['cum_distance'] = (data['distance'].cumsum())/1000
 
     data = data.fillna(0)
 
