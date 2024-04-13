@@ -16,7 +16,7 @@ from lib.helper_functions import create_timestamped_geojson, calc_elevation_plot
 from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
-    QProgressBar, QFormLayout, QWidget
+    QProgressBar, QFormLayout, QWidget, QDialog, QLabel, QDialogButtonBox, QLineEdit, QGridLayout
 from PyQt5.QtCore import Qt
 from folium.plugins import TimestampedGeoJson
 
@@ -50,11 +50,6 @@ class MainWindow(QMainWindow):
         main_layout_v1 = QVBoxLayout(central_widget)
         main_layout_v1.setAlignment(Qt.AlignVCenter)
 
-        # Get Activities button
-        self.getActivities_btn = QPushButton("Get Activities")
-        self.getActivities_btn.setFixedWidth(125)
-        self.getActivities_btn.setFixedHeight(25)
-
         # Activity 1 combo box
         self.activity1_combo = QComboBox(self)
         self.activity1_combo.setEditable(True)
@@ -70,26 +65,11 @@ class MainWindow(QMainWindow):
         self.run_btn.setFixedWidth(125)
         self.run_btn.setFixedHeight(25)
 
-        # Data collection progress bar
-        self.data_progress = QProgressBar(self)
-        self.data_progress.setAlignment(Qt.AlignCenter)
-        self.data_progress.setMinimum(0)
-        self.data_progress.setMaximum(100)
-        self.data_progress.setValue(0)
-
-        # GPX collection progress bar
-        self.gpx_progress = QProgressBar(self)
-        self.gpx_progress.setAlignment(Qt.AlignCenter)
-        self.gpx_progress.setMinimum(0)
-        self.gpx_progress.setMaximum(100)
-        self.gpx_progress.setValue(0)
-
         # Add widgets to form layout and add form layout
         main_layout_form = QFormLayout()
-        main_layout_form.addRow(self.getActivities_btn, self.data_progress)
-        main_layout_form.addRow("Activity 1:", self.activity1_combo)
-        main_layout_form.addRow("Activity 2: ", self.activity2_combo)
-        main_layout_form.addRow(self.run_btn, self.gpx_progress)
+        main_layout_form.addRow("", self.activity1_combo)
+        main_layout_form.addRow("", self.activity2_combo)
+        main_layout_form.addRow("", self.run_btn)
 
         # Add form layout to the main layout
         main_layout_v1.addLayout(main_layout_form)
@@ -119,8 +99,11 @@ class MainWindow(QMainWindow):
 
         self.setLayout(main_layout_v1)
 
+        # Populate the ComboBoxes
+        self.update_combobox()
+
         # Button actions
-        self.getActivities_btn.clicked.connect(self.update_combobox)
+        # self.getActivities_btn.clicked.connect(self.update_combobox)
         self.run_btn.clicked.connect(self.process_activities)
 
     def update_combobox(self):
@@ -222,9 +205,50 @@ class MainWindow(QMainWindow):
 # TODO: Compare activities between multiple atheletes
 
 
+class AthleteSelectorDialog(QDialog):
+    """
+    Pop up dialog at the start of the application to select the athlete(s) to analyse
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.resize(240, 120)
+        self.setWindowTitle("Athlete Selection")
+
+        # Create custom buttons
+        yes_button = QPushButton("Yes")
+        yes_button.setFixedSize(100, 25)
+
+        no_button = QPushButton("No")
+        no_button.setFixedSize(100, 25)
+
+        athlete_entry = QLineEdit()
+        athlete_entry.setText("Enter Athlete ID...")
+
+        # Connect button signals
+        yes_button.clicked.connect(self.yes_clicked)
+        no_button.clicked.connect(self.no_clicked)
+
+        # Layout
+        layout = QVBoxLayout()
+        sublayout = QGridLayout()
+        sublayout.addWidget(athlete_entry, 0, 0, 1, 2)
+        sublayout.addWidget(yes_button, 1, 0)
+        sublayout.addWidget(no_button, 1, 1)
+        layout.addLayout(sublayout)
+        self.setLayout(layout)
+
+    def yes_clicked(self):
+        self.accept()
+
+    def no_clicked(self):
+        self.reject()
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet(Path('strava_stylesheet.qss').read_text())
-    window = MainWindow()
-    window.show()
+    athlete_selector = AthleteSelectorDialog()
+    if athlete_selector.exec_() == QDialog.Accepted:
+        window = MainWindow()
+        window.show()
     sys.exit(app.exec_())
