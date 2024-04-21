@@ -16,8 +16,8 @@ from lib.helper_functions import create_timestamped_geojson, calc_elevation_plot
 from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
-    QProgressBar, QFormLayout, QWidget, QDialog, QLabel, QDialogButtonBox, QLineEdit, QGridLayout
-from PyQt5.QtCore import Qt
+    QFormLayout, QWidget, QDialog, QLineEdit, QGridLayout
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from folium.plugins import TimestampedGeoJson
 
 
@@ -53,12 +53,12 @@ class MainWindow(QMainWindow):
         # Activity 1 combo box
         self.activity1_combo = QComboBox(self)
         self.activity1_combo.setEditable(True)
-        self.activity1_combo.addItem("NO DATA")
+        self.activity1_combo.addItem("Loading...")
 
         # Activity 2 combo box
         self.activity2_combo = QComboBox(self)
         self.activity2_combo.setEditable(True)
-        self.activity2_combo.addItem("NO DATA")
+        self.activity2_combo.addItem("Loading...")
 
         # RUN button
         self.run_btn = QPushButton("RUN")
@@ -108,9 +108,6 @@ class MainWindow(QMainWindow):
         main_layout_v1.addWidget(self.webview)
 
         self.setLayout(main_layout_v1)
-
-        # Populate the ComboBoxes
-        self.update_combobox()
 
         # Button actions
         self.run_btn.clicked.connect(self.process_activities)
@@ -260,11 +257,44 @@ class AthleteSelectorDialog(QDialog):
         self.reject()
 
 
+class ActivitiesThread(QThread):
+    """
+    Setup of thread class to handle the getting of activities from Strava
+    """
+    activitiesFetched = pyqtSignal(list)
+
+    def __init__(self):
+        super().__init__()
+
+    def run(self):
+        activities = strava_dataset.get_activities()
+        self.activitiesFetched.emit(activities)
+
+
+class ApplicationSetup:
+    """
+    Contains all the required setup procedure for the application including both the initial dialog pop-up, main
+    application window, stylesheet and thread setup.
+    """
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.app.setStyleSheet(Path('strava_stylesheet.qss').read_text())
+
+        self.athlete_selector = AthleteSelectorDialog()
+        self.athlete_selector.accepted.connect(self.on_dialog_accepted)
+        self.main_window = MainWindow()
+
+    def on_dialog_accepted(self):
+        thread = ActivitiesThread()
+        thread.activitiesFetched.connect(self.main_window.update_combobox)
+        thread.start()
+        self.main_window.show()
+
+    def run(self):
+        self.athlete_selector.show()
+        return self.app.exec_()
+
+
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setStyleSheet(Path('strava_stylesheet.qss').read_text())
-    athlete_selector = AthleteSelectorDialog()
-    if athlete_selector.exec_() == QDialog.Accepted:
-        window = MainWindow()
-        window.show()
-    sys.exit(app.exec_())
+    app_setup = ApplicationSetup()
+    sys.exit(app_setup.run())
