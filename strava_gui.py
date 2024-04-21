@@ -16,7 +16,7 @@ from lib.helper_functions import create_timestamped_geojson, calc_elevation_plot
 from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
-    QFormLayout, QWidget, QDialog, QLineEdit, QGridLayout
+    QFormLayout, QWidget, QDialog, QLineEdit, QGridLayout, QHBoxLayout
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from folium.plugins import TimestampedGeoJson
 
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
 
         # Window Setup (Title, Size, Position ...)
         self.setWindowTitle("Strava GUI - v0.1")
-        self.setMinimumSize(1000, 1000)
+        # self.setMinimumSize(1000, 1000)
         frame_geometry = self.frameGeometry()
         screen_center = QDesktopWidget().availableGeometry().center()
         frame_geometry.moveCenter(screen_center)
@@ -46,9 +46,9 @@ class MainWindow(QMainWindow):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
-        # Layout Structure (vertical box)
-        main_layout_v1 = QVBoxLayout(central_widget)
-        main_layout_v1.setAlignment(Qt.AlignVCenter)
+        # Layout Structure (Horizontal box)
+        main_layout_h1 = QHBoxLayout(central_widget)
+        main_layout_h1.setAlignment(Qt.AlignVCenter)
 
         # Activity 1 combo box
         self.activity1_combo = QComboBox(self)
@@ -65,12 +65,6 @@ class MainWindow(QMainWindow):
         self.run_btn.setFixedWidth(125)
         self.run_btn.setFixedHeight(25)
 
-        # Add widgets to form layout and add form layout
-        main_layout_form = QFormLayout()
-        main_layout_form.addRow("", self.activity1_combo)
-        main_layout_form.addRow("", self.activity2_combo)
-        main_layout_form.addRow("", self.run_btn)
-
         # Create map with starting lat long and zoom
         strava_map = folium.Map(location=[51.381065, -2.359017], tiles='CartoDBPositron', zoom_start=14)
 
@@ -80,7 +74,7 @@ class MainWindow(QMainWindow):
 
         # Create QWebEngineView widget to display map
         self.webview = QWebEngineView(self)
-        self.webview.setMinimumSize(600, 400)
+        self.webview.setMinimumSize(500, 500)
         self.webview.setHtml(data.getvalue().decode())
 
         # Create PlotWidget to display elevation of activity 1
@@ -91,6 +85,7 @@ class MainWindow(QMainWindow):
         self.elevation_plot_act1.setYRange(0, 100)
         self.elevation_plot_act1.setBackground("#1E1F22")
         self.pen1 = pg.mkPen(color="#3574F0", width=2)
+        self.elevation_plot_act1.setFixedHeight(200)
 
         # Create PlotWidget to display elevation of activity 2
         self.elevation_plot_act2 = pg.PlotWidget()
@@ -100,14 +95,23 @@ class MainWindow(QMainWindow):
         self.elevation_plot_act2.setYRange(0, 100)
         self.elevation_plot_act2.setBackground("#1E1F22")
         self.pen2 = pg.mkPen(color="#7D1A3B", width=2)
+        self.elevation_plot_act2.setFixedHeight(200)
 
         # Add widgets to main layout
+        main_layout_form = QFormLayout()
+        main_layout_form.addRow("", self.activity1_combo)
+        main_layout_form.addRow("", self.activity2_combo)
+        main_layout_form.addRow("", self.run_btn)
+
+        main_layout_v1 = QVBoxLayout()
         main_layout_v1.addLayout(main_layout_form)
         main_layout_v1.addWidget(self.elevation_plot_act1)
         main_layout_v1.addWidget(self.elevation_plot_act2)
-        main_layout_v1.addWidget(self.webview)
 
-        self.setLayout(main_layout_v1)
+        main_layout_h1.addWidget(self.webview)
+        main_layout_h1.addLayout(main_layout_v1)
+
+        self.setLayout(main_layout_h1)
 
         # Button actions
         self.run_btn.clicked.connect(self.process_activities)
