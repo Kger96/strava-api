@@ -16,7 +16,7 @@ from lib.helper_functions import create_timestamped_geojson, calc_elevation_plot
 from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
-    QFormLayout, QWidget, QDialog, QLineEdit, QGridLayout, QHBoxLayout
+    QFormLayout, QWidget, QDialog, QLineEdit, QGridLayout, QHBoxLayout, QGroupBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from folium.plugins import TimestampedGeoJson
 
@@ -50,6 +50,12 @@ class MainWindow(QMainWindow):
         main_layout_h1 = QHBoxLayout(central_widget)
         main_layout_h1.setAlignment(Qt.AlignVCenter)
 
+        # Activity Group Boxes
+        activity1_group = QGroupBox("")
+        activity1_group.setObjectName("CUSTOMGroupBox")
+        activity2_group = QGroupBox("")
+        activity2_group.setObjectName("CUSTOMGroupBox")
+
         # Activity 1 combo box
         self.activity1_combo = QComboBox(self)
         self.activity1_combo.setEditable(True)
@@ -74,7 +80,7 @@ class MainWindow(QMainWindow):
 
         # Create QWebEngineView widget to display map
         self.webview = QWebEngineView(self)
-        self.webview.setMinimumSize(500, 500)
+        self.webview.setMinimumSize(800, 500)
         self.webview.setHtml(data.getvalue().decode())
 
         # Create PlotWidget to display elevation of activity 1
@@ -86,6 +92,7 @@ class MainWindow(QMainWindow):
         self.elevation_plot_act1.setBackground("#1E1F22")
         self.pen1 = pg.mkPen(color="#3574F0", width=2)
         self.elevation_plot_act1.setFixedHeight(200)
+        self.elevation_plot_act1.setMinimumWidth(800)
 
         # Create PlotWidget to display elevation of activity 2
         self.elevation_plot_act2 = pg.PlotWidget()
@@ -96,17 +103,30 @@ class MainWindow(QMainWindow):
         self.elevation_plot_act2.setBackground("#1E1F22")
         self.pen2 = pg.mkPen(color="#7D1A3B", width=2)
         self.elevation_plot_act2.setFixedHeight(200)
+        self.elevation_plot_act2.setMinimumWidth(800)
 
-        # Add widgets to main layout
-        main_layout_form = QFormLayout()
-        main_layout_form.addRow("", self.activity1_combo)
-        main_layout_form.addRow("", self.activity2_combo)
-        main_layout_form.addRow("", self.run_btn)
+        # Add layout to groupbox 1
+        group1_layout_v1 = QVBoxLayout(activity1_group)
+
+        # Add layout to groupbox 2
+        group2_layout_v1 = QVBoxLayout(activity2_group)
+
+        # Add widgets to layout group 1
+        group1_layout_v1.addWidget(self.activity1_combo)
+        group1_layout_v1.addWidget(self.elevation_plot_act1)
+
+        # Add widgets to layout group 2
+        group2_layout_v1.addWidget(self.activity2_combo)
+        group2_layout_v1.addWidget(self.elevation_plot_act2)
+
+        # Set layouts
+        activity1_group.setLayout(group1_layout_v1)
+        activity2_group.setLayout(group2_layout_v1)
 
         main_layout_v1 = QVBoxLayout()
-        main_layout_v1.addLayout(main_layout_form)
-        main_layout_v1.addWidget(self.elevation_plot_act1)
-        main_layout_v1.addWidget(self.elevation_plot_act2)
+        main_layout_v1.addWidget(activity1_group)
+        main_layout_v1.addWidget(activity2_group)
+        main_layout_v1.addWidget(self.run_btn)
 
         main_layout_h1.addWidget(self.webview)
         main_layout_h1.addLayout(main_layout_v1)

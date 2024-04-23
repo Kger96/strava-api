@@ -40,6 +40,16 @@ QListWidget {
 QGroupBox {
     color: #9F9F9F;}
 
+QGroupBox#CUSTOMGroupBox {
+    border: none;
+    margin: 0;
+    padding: 0;}
+
+QGroupBox#CUSTOMGroupBox:title {
+    background-color: transparent;
+    subcontrol-position: top left;
+    padding: 2px 13px}
+
 QTabWidget::pane {
     border-top: 2px solid #2B2D30;
     top: -0.1em;}
