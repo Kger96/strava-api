@@ -140,3 +140,9 @@ def haversine_distance(lat1, long1, lat2, long2):
 
 def total_elevation(data):
     data[data['elevation_diff'] >= 0]['elevation_diff'].sum()
+
+
+def calc_pace(distance, time):
+    pace = round((time/60)/(distance/1000), 2)
+
+    return pace

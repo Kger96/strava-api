@@ -67,16 +67,22 @@ def get_route_stream(activity_id, activity_num):
     return data
 
 
-def get_activity_id(activity_name, activities):
+def get_activity_data(activity_name, activities):
     """
-    Search the activity dataset for the names required and return the associated id
+    Search the activity dataset for the names required and return the associated id, distance and moving time
     """
     activity_id = 0
+    activity_distance = 0
+    activity_time = 0
+    activity_elevation = 0
 
     # Search through the full activities list and find the ID associated with the name
     for index, entry in enumerate(activities):
         if activity_name == activities[index]['name']:
+            activity_distance = activities[index]['distance']
+            activity_time = activities[index]['moving_time']
+            activity_elevation = activities[index]['total_elevation_gain']
             activity_id = activities[index]['id']
             break
 
-    return activity_id
+    return activity_id, activity_distance, activity_time, activity_elevation

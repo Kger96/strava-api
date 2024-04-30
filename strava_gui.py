@@ -12,11 +12,11 @@ import folium
 import numpy as np
 import pyqtgraph as pg
 
-from lib.helper_functions import create_timestamped_geojson, calc_elevation_plot
+from lib.helper_functions import create_timestamped_geojson, calc_elevation_plot, calc_pace
 from pathlib import Path
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QVBoxLayout, QPushButton, QComboBox, \
-    QFormLayout, QWidget, QDialog, QLineEdit, QGridLayout, QHBoxLayout, QGroupBox
+    QWidget, QDialog, QLineEdit, QGridLayout, QHBoxLayout, QGroupBox, QLabel
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from folium.plugins import TimestampedGeoJson
 
@@ -37,9 +37,8 @@ class MainWindow(QMainWindow):
 
         # Window Setup (Title, Size, Position ...)
         self.setWindowTitle("Strava GUI - v0.1")
-        # self.setMinimumSize(1000, 1000)
-        frame_geometry = self.frameGeometry()
         screen_center = QDesktopWidget().availableGeometry().center()
+        frame_geometry = self.frameGeometry()
         frame_geometry.moveCenter(screen_center)
 
         # Create central widget
@@ -85,8 +84,6 @@ class MainWindow(QMainWindow):
 
         # Create PlotWidget to display elevation of activity 1
         self.elevation_plot_act1 = pg.PlotWidget()
-        self.elevation_plot_act1.setLabel('left', "Elevation (m)")
-        self.elevation_plot_act1.setLabel('bottom', "Distance (km)")
         self.elevation_plot_act1.setXRange(0, 5)
         self.elevation_plot_act1.setYRange(0, 100)
         self.elevation_plot_act1.setBackground("#1E1F22")
@@ -96,8 +93,6 @@ class MainWindow(QMainWindow):
 
         # Create PlotWidget to display elevation of activity 2
         self.elevation_plot_act2 = pg.PlotWidget()
-        self.elevation_plot_act2.setLabel('left', "Elevation (m)")
-        self.elevation_plot_act2.setLabel('bottom', "Distance (km)")
         self.elevation_plot_act2.setXRange(0, 5)
         self.elevation_plot_act2.setYRange(0, 100)
         self.elevation_plot_act2.setBackground("#1E1F22")
@@ -105,23 +100,58 @@ class MainWindow(QMainWindow):
         self.elevation_plot_act2.setFixedHeight(200)
         self.elevation_plot_act2.setMinimumWidth(800)
 
-        # Add layout to groupbox 1
-        group1_layout_v1 = QVBoxLayout(activity1_group)
+        # Create grid layouts
+        act1_gridlayout = QGridLayout(activity1_group)
+        act2_gridlayout = QGridLayout(activity2_group)
 
-        # Add layout to groupbox 2
-        group2_layout_v1 = QVBoxLayout(activity2_group)
+        # Create distance textedit
+        act1_distance_txt = QLabel("<u>Distance<u>")
+        self.act1_distance_val = QLabel("<b>0.00 km<b>")
+        act1_pace_txt = QLabel("<u>Pace<u>")
+        self.act1_pace_val = QLabel("<b>0:00 /km<b>")
+        act1_elevation_txt = QLabel("<u>Elevation<u>")
+        self.act1_elevation_val = QLabel("<b>0 m<b>")
 
-        # Add widgets to layout group 1
-        group1_layout_v1.addWidget(self.activity1_combo)
-        group1_layout_v1.addWidget(self.elevation_plot_act1)
+        act2_distance_txt = QLabel("<u>Distance<u>")
+        self.act2_distance_val = QLabel("<b>0.00 km<b>")
+        act2_pace_txt = QLabel("<u>Pace<u>")
+        self.act2_pace_val = QLabel("<b>0:00 /km<b>")
+        act2_elevation_txt = QLabel("<u>Elevation<u>")
+        self.act2_elevation_val = QLabel("<b>0 m<b>")
 
-        # Add widgets to layout group 2
-        group2_layout_v1.addWidget(self.activity2_combo)
-        group2_layout_v1.addWidget(self.elevation_plot_act2)
+        activity1_group.setLayout(act1_gridlayout)
+        activity2_group.setLayout(act2_gridlayout)
 
-        # Set layouts
-        activity1_group.setLayout(group1_layout_v1)
-        activity2_group.setLayout(group2_layout_v1)
+        # Add widgets to grid layouts
+        act1_gridlayout.addWidget(act1_distance_txt, 1, 0)
+        act1_gridlayout.setAlignment(act1_distance_txt, Qt.AlignRight)
+        act1_gridlayout.addWidget(self.act1_distance_val, 2, 0)
+        act1_gridlayout.setAlignment(self.act1_distance_val, Qt.AlignRight)
+        act1_gridlayout.addWidget(act1_pace_txt, 1, 1)
+        act1_gridlayout.setAlignment(act1_pace_txt, Qt.AlignCenter)
+        act1_gridlayout.addWidget(self.act1_pace_val, 2, 1)
+        act1_gridlayout.setAlignment(self.act1_pace_val, Qt.AlignCenter)
+        act1_gridlayout.addWidget(act1_elevation_txt, 1, 2)
+        act1_gridlayout.setAlignment(act1_elevation_txt, Qt.AlignLeft)
+        act1_gridlayout.addWidget(self.act1_elevation_val, 2, 2)
+        act1_gridlayout.setAlignment(act1_elevation_txt, Qt.AlignLeft)
+        act1_gridlayout.addWidget(self.activity1_combo, 0, 0, 1, act1_gridlayout.columnCount())
+        act1_gridlayout.addWidget(self.elevation_plot_act1, 3, 0, 1, act1_gridlayout.columnCount())
+
+        act2_gridlayout.addWidget(act2_distance_txt, 1, 0)
+        act2_gridlayout.setAlignment(act2_distance_txt, Qt.AlignRight)
+        act2_gridlayout.addWidget(self.act2_distance_val, 2, 0)
+        act2_gridlayout.setAlignment(self.act2_distance_val, Qt.AlignRight)
+        act2_gridlayout.addWidget(act2_pace_txt, 1, 1)
+        act2_gridlayout.setAlignment(act2_pace_txt, Qt.AlignCenter)
+        act2_gridlayout.addWidget(self.act2_pace_val, 2, 1)
+        act2_gridlayout.setAlignment(self.act2_pace_val, Qt.AlignCenter)
+        act2_gridlayout.addWidget(act2_elevation_txt, 1, 2)
+        act2_gridlayout.setAlignment(act2_elevation_txt, Qt.AlignLeft)
+        act2_gridlayout.addWidget(self.act2_elevation_val, 2, 2)
+        act2_gridlayout.setAlignment(act2_elevation_txt, Qt.AlignLeft)
+        act2_gridlayout.addWidget(self.activity2_combo, 0, 0, 1, act2_gridlayout.columnCount())
+        act2_gridlayout.addWidget(self.elevation_plot_act2, 3, 0, 1, act2_gridlayout.columnCount())
 
         main_layout_v1 = QVBoxLayout()
         main_layout_v1.addWidget(activity1_group)
@@ -162,8 +192,22 @@ class MainWindow(QMainWindow):
         Take the activities chosen and process into dataframes and gpx files in preparation of animation.
         """
         # Get the activity ID for the activity names
-        activity1_id = strava_dataset.get_activity_id(self.activity1_combo.currentText(), self.activities)
-        activity2_id = strava_dataset.get_activity_id(self.activity2_combo.currentText(), self.activities)
+        activity1_id, activity1_distance, activity1_time, activity1_elevation = (
+            strava_dataset.get_activity_data(self.activity1_combo.currentText(), self.activities))
+        activity2_id, activity2_distance, activity2_time, activity2_elevation = (
+            strava_dataset.get_activity_data(self.activity2_combo.currentText(), self.activities))
+
+        # Calculate activity pace
+        activity1_pace = calc_pace(activity1_distance, activity1_time)
+        activity2_pace = calc_pace(activity2_distance, activity2_time)
+
+        # Update activity stats on GUI
+        self.act1_distance_val.setText(f"<b>{round(activity1_distance/1000, 2)} km<b>")
+        self.act1_pace_val.setText(f"<b>{activity1_pace} /km<b>")
+        self.act1_elevation_val.setText(f"<b>{activity1_elevation} m<b>")
+        self.act2_distance_val.setText(f"<b>{round(activity2_distance / 1000, 2)} km<b>")
+        self.act2_pace_val.setText(f"<b>{activity2_pace} /km<b>")
+        self.act2_elevation_val.setText(f"<b>{activity2_elevation} m<b>")
 
         # Create activity route dataframe
         activity1_df = strava_dataset.get_route_stream(activity1_id, 1)
@@ -236,10 +280,10 @@ class MainWindow(QMainWindow):
 
 # TODO: Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
 # TODO: Create thread for application and buttons etc.
-# TODO: Review activity choice matrix.
 # TODO: Make the flyby animation smoother.
 # TODO: Compare activities between multiple atheletes
 # TODO: Add the update combo box to its own thread to ensure it does not delay the loading of the application.
+# TODO: Only pull in RUNs
 
 
 class AthleteSelectorDialog(QDialog):
