@@ -143,6 +143,19 @@ def total_elevation(data):
 
 
 def calc_pace(distance, time):
-    pace = round((time/60)/(distance/1000), 2)
+    # Pace with unconverted seconds
+    raw_pace = round((time/60)/(distance/1000), 2)
 
-    return pace
+    # Extract Minutes from Pace
+    minutes_pace = int(raw_pace)
+
+    # Extract the unconverted seconds and convert them where 60sec is maximum
+    seconds_pace = round((raw_pace - minutes_pace) * 60)
+
+    # If seconds are 60 then add one to minutes and reset seconds to 0
+    if seconds_pace == 60:
+        minutes_pace += 1
+        seconds_pace = 0
+
+    # Return the pace as min:sec
+    return f"{minutes_pace}:{seconds_pace:02d}"

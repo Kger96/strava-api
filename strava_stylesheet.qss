@@ -11,7 +11,7 @@ QPushButton {
 
 QPushButton:hover {
     color: #9F9F9F;
-    border: 1px solid #1A3B7D;}
+    border: 1px solid #FC4C02;}
 
 QPushButton:pressed {
     color: #FFFFFF;
@@ -30,7 +30,7 @@ QLineEdit {
 
 QLineEdit:focus {
     color: #FFFFFF;
-    border: 1px solid #1A3B7D;
+    border: 1px solid #FC4C02;
 }
 
 QListWidget {
@@ -67,7 +67,7 @@ QTabBar::tab {
 
 QTabBar::tab:selected, QTabBar::tab:hover {
     background: #1E1F22;
-    border-bottom: 3px solid #1A3B7D;}
+    border-bottom: 3px solid #FC4C02;}
 
 QTabBar::tab:selected {
     color: #FFFFFF;
@@ -87,7 +87,7 @@ QComboBox {
 QComboBox QAbstractItemView {
     color: #9F9F9F;
     background-color: #1E1F22;
-    selection-background-color: #1A3B7D;
+    selection-background-color: #FC4C02;
     outline: 0px;
     padding: 1px;}
 
@@ -96,3 +96,8 @@ QProgressBar {
     background-color: #1E1F22;
     border: 1px solid #9F9F9F;
     border-radius: 5px;}
+
+QProgressBar::chunk {
+    background-color: #3add36;
+    width: 10px;
+    margin: 0.5px;}
