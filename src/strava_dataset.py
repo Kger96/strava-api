@@ -45,8 +45,6 @@ def get_route_stream(activity_id, activity_num, auth_manager):
     start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
     data['time'] = [(start + timedelta(seconds=t)) for t in activity_time]
 
-    data.to_csv(f'dist\\strava_activity{activity_num}', index=False)
-
     return data
 
 
