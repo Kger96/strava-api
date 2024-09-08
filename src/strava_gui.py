@@ -289,12 +289,6 @@ class MainWindow(QMainWindow):
         self.elevation_plot_act1.plot(x1, y1, pen=self.pen1, fillLevel=10, brush=(26, 59, 125, 50))
         self.elevation_plot_act2.plot(x2, y2, pen=self.pen2, fillLevel=10, brush=(125, 26, 59, 50))
 
-# TODO: Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
-# TODO: Compare activities between multiple atheletes
-# TODO: Add combo box to choose between Runs and Rides on setup screen
-# TODO: Set Map home location option on setup screen
-# TODO: Review map selection, try to get exact Strava map
-
 
 class StravaConnectDialog(QDialog):
     """

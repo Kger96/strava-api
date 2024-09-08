@@ -1,7 +1,8 @@
 # Strava Activity Animation
-*Author: Kieran Gash*
-
-*v1.0.0*
+*Author: Kieran Gash*\
+*Github:*\
+*Release Version: v1.0.0*\
+*OS: Windows*
 
 [![Python: 37, 38, 39, 310](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue)](https://python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/)
@@ -22,18 +23,77 @@ functionality is not yet added)
 This application is a work in progress and continued updates will be released resolving bugs and adding additional
 functionality. Currently desired functionality to improve/add can be found at the bottom of this README document. 
 
+## Application Screenshots
+**Logon/Connection dialog:**\
+![Strava Connect Dialog](lib/Strava Connect Dialog.png)
+
+**Main window:**\
+![Strava Connect Dialog](lib/Strava Animation GUI.png)
+
+## Installation
+Currently, this project has not been created into a package. Therefore, cloning the github repository is the best method
+for accessing all the required source code and executables.
+
+## Running the Application
+1. Locate and open the executable:\
+`"C: ...\strava-api\dist\strava_gui\strava_gui.exe"`
+2. Select the Strava button on the application connection dialog. 
+3. Log in to Strava using personal credentials. 
+4. Navigate back to the connection dialog and wait for loading to finish (approx. 10sec)
+5. Select activity 1 from the top drop down. 
+6. Select activity 2 from the bottom drop down.
+7. Select Run button to load the animation. 
+8. Select play button on the map to begin playing the animation. 
 
 ## Features
+***Strava Authentication Management***\
+Authentication is managed using strava_authoristation.py script. The script utilises requests and urllib.parse to store
+authentication codes, refresh tokens and access tokens so that the user can seamlessly use the application. A
+walkthrough guide is shown at the end of this README file. 
+
+***Strava Dataset Manipulation***\
+As part of the strava_dataset.py script, the users activities, activity data and GPS route stream information is
+extracted using access tokens and passed the graphical interface.
+
+***Time Stamped GeoJson Creation***\
+The mapping and animation feature requires a timestamped geojson to created. This can be located within the
+helper_functions.py script. The format is created using the activity dataframe as outputted by the Strava Dataset
+manipulation. 
+
+***Custom Stylesheet***\
+Stylesheet being used is entirely customised and stored within strava_stylesheet.qss. This utilises the orange colour
+theme as part of the Strava branding. 
+
+***Activity Animation***\
+Within the main GUI code, the animation is created using TimeStampedGeoJson feature of the Folium library. The created
+geojson is passed into this function and the map is updated continuously by plotting each geojson data point one after
+the other and leave the route trail behind. 
+
 
 ## Dependencies
-1. Users must have access to a Strava account
-2. If using the 
-
-## User Guide
-***Sub Heading***
+* Users must have access to a Strava account with activities utilising GPS data. \
+`https://www.strava.com/`
+* For executable user must be using a Windows PC. MAC OS is not supported!
+* If running source code a Python environment with the following packages are required:
+  * PyQt5 - Graphical UI design
+  * folium - Map design
+  * numpy - Array computation
+  * pyqtgraph - Scientific graphics
+  * pyqtspinner - Loading spinner
+  * requests - http interaction
 
 ## Bugs and Improvements
+- [ ] Improve the css "how to edit the default leaflet.timedimension_css when used in a python script"
+- [ ] Compare activities between multiple athletes
+- [ ] Add option to filter Runs and Rides on setup screen
+- [ ] Add map home location option on setup screen
+- [ ] Add Logout or change user option on main window.
+- [ ] Review map selection, try to get exact Strava map - mapbox?
 
+## Release History
+* v1.0.0 - Initial Release of executable
+
+## Strava Authentication Walkthrough
 
 1) Get Client ID and Client Secret from Strava application webpage:
 https://www.strava.com/settings/api
