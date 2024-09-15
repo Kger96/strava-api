@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self.activities = None
 
         # Window Setup (Title, Size, Position ...)
-        self.setWindowTitle("Strava GUI - v0.1")
+        self.setWindowTitle("Strava GUI - v2.0.0")
         self.resize(1600, 600)
         screen_center = QDesktopWidget().availableGeometry().center()
         frame_geometry = self.frameGeometry()

@@ -1,7 +1,7 @@
 # Strava Activity Animation
 *Author: Kieran Gash*\
 *Github:*\
-*Release Version: v1.0.0*\
+*Release Version: v2.0.0*\
 *OS: Windows*
 
 [![Python: 37, 38, 39, 310](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue)](https://python.org)
@@ -91,10 +91,10 @@ the other and leave the route trail behind.
 - [ ] Review map selection, try to get exact Strava map - mapbox?
 
 ## Release History
+* v2.0.0 - Connection dialog added and bug fixes
 * v1.0.0 - Initial Release of executable
 
 ## Strava Authentication Walkthrough
-
 1) Get Client ID and Client Secret from Strava application webpage:
 https://www.strava.com/settings/api
 

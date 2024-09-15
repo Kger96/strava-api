@@ -1,0 +1,103 @@
+QMainWindow {
+    background-color: #1E1F22;}
+
+QDialog {
+    background-color: #1E1F22;}
+
+QPushButton {
+    color: #9F9F9F;
+    border: 1px solid #9F9F9F;
+    border-radius: 5px;}
+
+QPushButton:hover {
+    color: #9F9F9F;
+    border: 1px solid #FC4C02;}
+
+QPushButton:pressed {
+    color: #FFFFFF;
+    border: 1px solid #3574F0;
+    background: #2B2D30;}
+
+QLabel {
+    color: #9F9F9F;}
+
+QLineEdit {
+    color: #9F9F9F;
+    background-color: #1E1F22;
+    border: 1px solid #9F9F9F;
+    border-radius: 5px;
+    padding: 5px;}
+
+QLineEdit:focus {
+    color: #FFFFFF;
+    border: 1px solid #FC4C02;
+}
+
+QListWidget {
+    color: #9F9F9F;
+    background-color: #1E1F22;}
+
+QGroupBox {
+    color: #9F9F9F;}
+
+QGroupBox#CUSTOMGroupBox {
+    border: none;
+    margin: 0;
+    padding: 0;}
+
+QGroupBox#CUSTOMGroupBox:title {
+    background-color: transparent;
+    subcontrol-position: top left;
+    padding: 2px 13px}
+
+QTabWidget::pane {
+    border-top: 2px solid #2B2D30;
+    top: -0.1em;}
+
+QTabWidget::tab-bar {
+    alignment: center;}
+
+QTabBar::tab {
+    color: #9F9F9F;
+    background: #1E1F22;
+    border: 1px solid #1E1F22;
+    border-bottom: 1px solid #2B2D30;
+    min-width: 20ex;
+    padding: 10px;}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: #1E1F22;
+    border-bottom: 3px solid #FC4C02;}
+
+QTabBar::tab:selected {
+    color: #FFFFFF;
+    border: 1px solid #1E1F22;
+    border-bottom: 3px solid #3574F0;}
+
+QTabBar::tab:!selected {
+    margin-top: 2px;}
+
+QComboBox {
+    color: #9F9F9F;
+    background-color: #1E1F22;
+    border: 1px solid #9F9F9F;
+    border-radius: 5px;
+    padding: 5px;}
+
+QComboBox QAbstractItemView {
+    color: #9F9F9F;
+    background-color: #1E1F22;
+    selection-background-color: #FC4C02;
+    outline: 0px;
+    padding: 1px;}
+
+QProgressBar {
+    color: #9F9F9F;
+    background-color: #1E1F22;
+    border: 1px solid #9F9F9F;
+    border-radius: 5px;}
+
+QProgressBar::chunk {
+    background-color: #3add36;
+    width: 10px;
+    margin: 0.5px;}
