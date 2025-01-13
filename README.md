@@ -25,10 +25,11 @@ functionality. Currently desired functionality to improve/add can be found at th
 
 ## Application Screenshots
 **Logon/Connection dialog:**\
-![Strava Connect Dialog](lib/Strava Connect Dialog.png)
+![Strava Connect Dialog](lib/Strava_Connect_Dialog.png)
+<br><br>
 
-**Main window:**\
-![Strava Connect Dialog](lib/Strava Animation GUI.png)
+**Main Window:**
+![Strava Analysis Main Window](lib/Strava_Analysis_GUI.gif)
 
 ## Installation
 Currently, this project has not been created into a package. Therefore, cloning the github repository is the best method
