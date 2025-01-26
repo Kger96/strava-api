@@ -7,6 +7,10 @@ Date: 21/03/2024
 
 import sys
 import io
+import os
+
+# Add the parent directory of the 'lib' folder to the Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from PyQt5.QtGui import QIcon, QColor
 
@@ -305,7 +309,7 @@ class StravaConnectDialog(QDialog):
         # Create Strava authentication button
         connect_button = QPushButton("")
         connect_button.setFixedSize(200, 25)
-        connect_button.setIcon(QIcon("C:\\workspace\\Strava\\strava-api\\lib\\strava_logo.png"))
+        connect_button.setIcon(QIcon(r"C:\_Git\strava-api\lib\strava_logo.png"))
         connect_button.setIconSize(QSize(100, 100))
         connect_button.setLayoutDirection(Qt.RightToLeft)
 

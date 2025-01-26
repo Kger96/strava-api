@@ -7,7 +7,7 @@
   },
   {
    "optionDest": "filenames",
-   "value": "C:/workspace/Strava/strava-api/src/strava_gui.py"
+   "value": "C:/_Git/strava-api/src/strava_gui.py"
   },
   {
    "optionDest": "onefile",
@@ -19,7 +19,7 @@
   },
   {
    "optionDest": "icon_file",
-   "value": "C:/workspace/Strava/strava-api/lib/strava_icon.ico"
+   "value": "C:/_Git/strava-api/lib/strava_icon.ico"
   },
   {
    "optionDest": "clean_build",
@@ -55,7 +55,7 @@
   },
   {
    "optionDest": "datas",
-   "value": "C:/workspace/Strava/strava-api/lib;lib/"
+   "value": "C:/_Git/strava-api/lib;lib/"
   },
   {
    "optionDest": "hiddenimports",
@@ -64,6 +64,14 @@
   {
    "optionDest": "hiddenimports",
    "value": "haversine"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "geopandas"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "OpenGL"
   }
  ],
  "nonPyinstallerOptions": {
